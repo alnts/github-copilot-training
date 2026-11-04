@@ -60,8 +60,14 @@ All data is stored in memory, which means data will be reset when the server res
 
 ## Tests
 
-Run the API regression tests from the repository root:
+Install dependencies and run the backend tests from the repository root:
 
 ```bash
-python -m unittest discover -s tests -v
+python -m pip install -r requirements.txt
+python -m pytest
 ```
+
+Tests live in `tests/test_activities.py` and cover the root redirect, activity
+listing, signup, unregistration, and error responses. Shared pytest fixtures in
+`tests/conftest.py` provide a FastAPI test client and isolated in-memory activity
+data, restoring the original data after each test. No live server is required.
