@@ -5,7 +5,7 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
@@ -105,3 +105,24 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+@app.delete("/activities/{activity_name}/participants/{participant_index}")
+def unregister_from_activity(
+    activity_name: str, participant_index: int, email: str = Query(...)
+):
+    """Unregister the selected participant entry from an activity."""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    participants = activities[activity_name]["participants"]
+    if participant_index < 0 or participant_index >= len(participants):
+        raise HTTPException(status_code=404, detail="Participant not found")
+    if participants[participant_index] != email:
+        raise HTTPException(
+            status_code=409,
+            detail="Participant list has changed. Please refresh and try again.",
+        )
+
+    participants.pop(participant_index)
+    return {"message": f"Unregistered {email} from {activity_name}"}
