@@ -5,6 +5,8 @@ A super simple FastAPI application that allows students to view and sign up for 
 ## Features
 
 - View all available extracurricular activities
+- See signed-up participants on each activity card
+- Unregister a participant with the trash icon after confirming the action
 - Sign up for activities
 
 ## Getting Started
@@ -31,6 +33,13 @@ A super simple FastAPI application that allows students to view and sign up for 
 | ------ | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
 | GET    | `/activities`                                                     | Get all activities with their details and current participant count |
 | POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Sign up for an activity                                             |
+| DELETE | `/activities/{activity_name}/participants/{participant_index}?email=student@mergington.edu` | Unregister one selected participant entry |
+
+Unregistration uses the participant's zero-based list index and expected email.
+It removes only that entry, even if an email appears more than once. Missing
+activities or participant entries return `404`; an index/email mismatch returns
+`409` so a stale selection does not remove a different participant. The UI
+refreshes the participant list, counts, and availability after removal.
 
 ## Data Model
 
@@ -48,3 +57,17 @@ The application uses a simple data model with meaningful identifiers:
    - Grade level
 
 All data is stored in memory, which means data will be reset when the server restarts.
+
+## Tests
+
+Install dependencies and run the backend tests from the repository root:
+
+```bash
+python -m pip install -r requirements.txt
+python -m pytest
+```
+
+Tests live in `tests/test_activities.py` and cover the root redirect, activity
+listing, signup, unregistration, and error responses. Shared pytest fixtures in
+`tests/conftest.py` provide a FastAPI test client and isolated in-memory activity
+data, restoring the original data after each test. No live server is required.
